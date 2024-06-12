@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "839349065153",
+    "project_id": "progess-83e07",
+    "storage_bucket": "progess-83e07.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:839349065153:android:b24450dbef6e0cb8b74b40",
+        "android_client_info": {
+          "package_name": "com.Flutter.Progress"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbbvtDdExBL9DerH3zZyk1jMXbqzqT-dA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
