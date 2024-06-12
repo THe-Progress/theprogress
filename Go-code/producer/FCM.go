@@ -1,78 +1,54 @@
-// fcm.go
+
 package main
 
-import (
-	"bufio"
-	"context"
-	"encoding/json"
-	"log"
-	"net/http"
-	"os"
 
+import (
+    "context"
+
+    firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
+    "google.golang.org/api/option"
 )
 
-// SendFCMNotification sends a notification to all the registered tokens.
-func SendFCMNotification(client *messaging.Client, title, body string) error {
-	file, err := os.Open("tokens.txt")
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		token := scanner.Text()
-
-		message := &messaging.Message{
-			Notification: &messaging.Notification{
-				Title: title,
-				Body:  body,
-			},
-			Token: token,
-		}
-
-		_, err := client.Send(context.Background(), message)
-		if err != nil {
-			log.Printf("Error sending FCM notification to token %s: %v", token, err)
-		} else {
-			log.Printf("Successfully sent FCM notification to token %s", token)
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		return err
-	}
-
-	return nil
+func FirebaseInit(ctx context.Context) (*messaging.Client, error) {
+    // Use the path to your service account credential json file
+    opt := option.WithCredentialsFile("./firebase.json")
+    // Create a new firebase app
+    app, err := firebase.NewApp(ctx, nil, opt)
+    if err != nil {
+        return nil, err
+    }
+    // Get the FCM object
+    fcmClient, err := app.Messaging(ctx)
+    if err != nil {
+        return nil, err
+    }
+    return fcmClient, nil
 }
 
-// RegisterTokenHandler handles the registration of new FCM tokens.
-func RegisterTokenHandler(w http.ResponseWriter, r *http.Request) {
-	var requestData struct {
-		Token string `json:"token"`
-	}
+func SendNotification(
+    fcmClient *messaging.Client,
+    ctx context.Context,
+    tokens []string,
+	message string,
+) error {
+    //Send to One Token
+    _, err := fcmClient.Send(ctx, &messaging.Message{
+        Token: tokens[0],
+        Data: map[string]string{
+            message: message,
+        },
+    })
+    if err != nil {
+        return err
+    }
 
-	err := json.NewDecoder(r.Body).Decode(&requestData)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	// Save the token to your database or any persistent storage.
-	// For example, saving to a file (this is just a simple example, you should use a database in production).
-	file, err := os.OpenFile("tokens.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer file.Close()
-
-	if _, err = file.WriteString(requestData.Token + "\n"); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Token registered successfully"))
+    //Send to Multiple Tokens
+    _, err = fcmClient.SendMulticast(ctx, &messaging.MulticastMessage{
+        Data: map[string]string{
+            message: message,
+        },
+        Tokens: tokens,
+    })
+    return err
 }
