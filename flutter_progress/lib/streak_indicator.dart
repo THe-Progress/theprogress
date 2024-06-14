@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'streak_details_screen.dart'; // Import the StreakDetailsScreen
+
 //plain streak indicator
 class StreakIndicator extends StatefulWidget {
   @override
@@ -44,95 +46,106 @@ class _StreakIndicatorState extends State<StreakIndicator> {
   Widget build(BuildContext context) {
     List<String> orderedWeekdays = _getOrderedWeekdays();
 
-    return Card(
-      elevation: 4.0,
-      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.local_fire_department,
-                    color: Colors.red, size: 30),
-                const SizedBox(width: 8),
-                Text(
-                  '$currentStreak${currentStreak == 1 ? ' Day' : " Days "}',
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () {
+        // Navigate to the StreakDetailsScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => StreakDetailsScreen()),
+        );
+      },
+      child: Card(
+        elevation: 4.0,
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.local_fire_department,
+                      color: Colors.red, size: 30),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$currentStreak${currentStreak == 1 ? ' Day' : " Days "}',
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              currentStreak >= 46
-                  ? streakMessages[9]
-                  : streakMessages[currentStreak ~/ 5],
-              style: TextStyle(
-                color: Colors.grey[700],
-                fontSize: 18,
+                ],
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(
-                5,
-                (index) {
-                  bool isStreakDay;
-                  if (index == 4) {
-                    isStreakDay = isTodayStreakDay;
-                  } else if ((index + currentStreak) >=
-                      4 + (isTodayStreakDay ? 1 : 0)) {
-                    isStreakDay = true;
-                  } else {
-                    isStreakDay = false;
-                  }
-                  return Column(
-                    children: [
-                      Text(
-                        orderedWeekdays[index],
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color:
-                              isStreakDay ? Colors.redAccent : Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color:
-                              isStreakDay ? Colors.redAccent : Colors.grey[350],
-                          shape: BoxShape.circle,
-                          border: Border.all(
+              const SizedBox(height: 8),
+              Text(
+                currentStreak >= 46
+                    ? streakMessages[9]
+                    : streakMessages[currentStreak ~/ 5],
+                style: TextStyle(
+                  color: Colors.grey[700],
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(
+                  5,
+                  (index) {
+                    bool isStreakDay;
+                    if (index == 4) {
+                      isStreakDay = isTodayStreakDay;
+                    } else if ((index + currentStreak) >=
+                        4 + (isTodayStreakDay ? 1 : 0)) {
+                      isStreakDay = true;
+                    } else {
+                      isStreakDay = false;
+                    }
+                    return Column(
+                      children: [
+                        Text(
+                          orderedWeekdays[index],
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
                             color: isStreakDay
-                                ? Colors.redAccent!
-                                : Colors.grey[200]!,
-                            width: 2,
+                                ? Colors.redAccent
+                                : Colors.grey[600],
                           ),
                         ),
-                        child: Center(
-                          child: isStreakDay
-                              ? const Icon(Icons.check, color: Colors.white)
-                              : null,
+                        const SizedBox(height: 4),
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: isStreakDay
+                                ? Colors.redAccent
+                                : Colors.grey[350],
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isStreakDay
+                                  ? Colors.redAccent!
+                                  : Colors.grey[200]!,
+                              width: 2,
+                            ),
+                          ),
+                          child: Center(
+                            child: isStreakDay
+                                ? const Icon(Icons.check, color: Colors.white)
+                                : null,
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
