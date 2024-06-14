@@ -1,6 +1,7 @@
 // mainapp.dart
 import 'package:flutter/material.dart';
 import 'usage_stats_screen.dart';
+
 //made this thinking there will be multiple windows except usagestatsscreen but currently it just contains usagestatsscreen
 class MainApp extends StatelessWidget {
   final Map<String, TimeOfDay> selectedActivities;

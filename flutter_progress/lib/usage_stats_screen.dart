@@ -6,7 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'app_list_item.dart';
 import 'streak_indicator.dart';
 import 'app_usage_service.dart';
-//this takes permission on when initially started and shows streakindicator in top and calls app_list_item.dart for rest 
+
 class UsageStatsScreen extends StatefulWidget {
   @override
   _UsageStatsScreenState createState() => _UsageStatsScreenState();
@@ -14,8 +14,7 @@ class UsageStatsScreen extends StatefulWidget {
 
 class _UsageStatsScreenState extends State<UsageStatsScreen> {
   List<Application> installedApps = [];
-  Map<String?, NetworkInfo?> _netInfoMap = {};
-  Map<String?, UsageInfo?> _usageInfoMap = {};
+  Map<String, UsageInfo> _usageInfoMap = {};
   Set<String> favouriteApps = Set<String>();
 
   @override
@@ -31,7 +30,6 @@ class _UsageStatsScreenState extends State<UsageStatsScreen> {
 
       final result = await fetchUsageStatsAndApps();
       setState(() {
-        _netInfoMap = result.netInfoMap;
         _usageInfoMap = result.usageInfoMap;
         installedApps = result.installedApps;
         _sortApps();

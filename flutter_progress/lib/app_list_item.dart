@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:device_apps/device_apps.dart';
 import 'package:usage_stats/usage_stats.dart';
-//shows apps and icons 
+
+// Shows apps and icons
 class AppListItem extends StatelessWidget {
   final Application app;
   final UsageInfo? usageInfo;
@@ -17,21 +18,14 @@ class AppListItem extends StatelessWidget {
   });
 
   String formatDuration(Duration duration) {
-    int inSeconds = duration.inSeconds;
-    int hours = inSeconds ~/ 3600;
-    int minutes = (inSeconds % 3600) ~/ 60;
-    int seconds = inSeconds % 60;
+    int hours = duration.inHours;
+    int minutes = duration.inMinutes % 60;
+    int seconds = duration.inSeconds % 60;
 
     String formatted = '';
-    if (hours > 0) {
-      formatted += '${hours}h ';
-    }
-    if (minutes > 0) {
-      formatted += '${minutes}m ';
-    }
-    if (seconds > 0) {
-      formatted += '${seconds}s';
-    }
+    if (hours > 0) formatted += '${hours}h ';
+    if (minutes > 0) formatted += '${minutes}m ';
+    if (seconds > 0) formatted += '${seconds}s';
 
     return formatted.trim();
   }
@@ -53,27 +47,12 @@ class AppListItem extends StatelessWidget {
             : null,
         title: Text(app.appName,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Commented out the network usage section
-            /*
-            networkInfo == null
-                ? Text("Unknown network usage")
-                : Text(
-                    "Received bytes: ${networkInfo.rxTotalBytes}\nTransferred bytes: ${networkInfo.txTotalBytes}",
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-            SizedBox(height: 4),
-            */
-            usageInfo == null
-                ? const Text("No usage data")
-                : Text(
-                    "Screen Time: ${formatDuration(Duration(milliseconds: int.parse(usageInfo!.totalTimeInForeground!)))}",
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-          ],
-        ),
+        subtitle: usageInfo == null
+            ? const Text("No usage data")
+            : Text(
+                "Screen Time: ${formatDuration(Duration(milliseconds: int.parse(usageInfo!.totalTimeInForeground!)))}",
+                style: TextStyle(color: Colors.grey[600]),
+              ),
         trailing: IconButton(
           icon: Icon(
             isFavourite ? Icons.star : Icons.star_border,

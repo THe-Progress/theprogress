@@ -113,6 +113,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     selectedActivities = {};
   }
 
+  void _onActivitySelectionChanged() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,36 +141,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16.0),
-                    ActivitySelection(selectedActivities: selectedActivities),
-                  ],
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Get Started',
-                      style: TextStyle(
-                          fontSize: 24.0, fontWeight: FontWeight.bold),
+                    ActivitySelection(
+                      selectedActivities: selectedActivities,
+                      onSelectionChanged: _onActivitySelectionChanged,
                     ),
-                    const SizedBox(height: 16.0),
-                    const Text(
-                      'You are all set! Tap the button below to start tracking your progress.',
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24.0),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MainApp(
-                              selectedActivities: selectedActivities,
-                            ),
+                    if (selectedActivities.isNotEmpty)
+                      Column(
+                        children: [
+                          const SizedBox(height: 24.0),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MainApp(
+                                    selectedActivities: selectedActivities,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: const Text('Get Started'),
                           ),
-                        );
-                      },
-                      child: const Text('Get Started'),
-                    ),
+                        ],
+                      ),
                   ],
                 ),
               ],
@@ -174,7 +171,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           SmoothPageIndicator(
             controller: _pageController,
-            count: _onboardingScreens.length + 2, // Added 2 for the new pages
+            count: _onboardingScreens.length + 1, // Added 1 for the new page
             effect: const ScrollingDotsEffect(
               activeDotColor: Colors.blue,
               dotColor: Colors.grey,
@@ -232,8 +229,13 @@ const List<String> availableActivities = [
 
 class ActivitySelection extends StatefulWidget {
   final Map<String, TimeOfDay> selectedActivities;
+  final VoidCallback onSelectionChanged;
 
-  const ActivitySelection({super.key, required this.selectedActivities});
+  const ActivitySelection({
+    super.key,
+    required this.selectedActivities,
+    required this.onSelectionChanged,
+  });
 
   @override
   State<ActivitySelection> createState() => _ActivitySelectionState();
@@ -250,6 +252,7 @@ class _ActivitySelectionState extends State<ActivitySelection> {
     if (pickedTime != null) {
       setState(() {
         widget.selectedActivities[activity] = pickedTime;
+        widget.onSelectionChanged();
       });
     }
   }
@@ -269,6 +272,7 @@ class _ActivitySelectionState extends State<ActivitySelection> {
             } else {
               setState(() {
                 widget.selectedActivities.remove(activity);
+                widget.onSelectionChanged();
               });
             }
           },
