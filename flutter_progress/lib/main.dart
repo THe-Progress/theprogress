@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'mainapp.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'app_data.dart';
 
-//has onboarding screen and calls mainapp.dart when get started is called
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -14,7 +15,7 @@ void main() async {
   );
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   final FCMToken = await messaging.getToken();
-  print("token, ${FCMToken}");
+  print("token, $FCMToken");
   await messaging.setAutoInitEnabled(true);
   NotificationSettings settings = await messaging.requestPermission(
     alert: true,
@@ -23,13 +24,13 @@ void main() async {
     provisional: true,
   );
 
-  // Handle the settings response
   if (settings.authorizationStatus == AuthorizationStatus.authorized ||
       settings.authorizationStatus == AuthorizationStatus.provisional) {
     print('User granted permission');
   } else {
     print('User declined or has not accepted permission');
   }
+
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print('Received a message while in the foreground!');
     print('Message data: ${message.data}');
@@ -38,7 +39,13 @@ void main() async {
       print('Message also contained a notification: ${message.notification}');
     }
   });
-  runApp(const MyApp());
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AppData(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -54,8 +61,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-
-    // Subscribe to a topic
     _subscribeToTopic('xxx');
   }
 
@@ -86,19 +91,16 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   final List<Widget> _onboardingScreens = [
-    // Welcome Screen
     const OnboardingPage(
       title: 'Welcome to Progress!',
       description:
           'This app is designed to help you stay focused and achieve your goals.',
     ),
-    // Benefits Highlights
     const OnboardingPage(
       title: 'Benefits Highlights',
       description:
           'Track your progress and stay motivated with personalized reminders and rewards.',
     ),
-    // User Permissions
     const OnboardingPage(
       title: 'User Permissions',
       description:
@@ -114,7 +116,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _onActivitySelectionChanged() {
-    setState(() {});
+    // Schedule the state change after the current frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {});
+    });
+  }
+
+  void _navigateToMainApp(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainApp(
+            selectedActivities: selectedActivities,
+          ),
+        ),
+      );
+    });
   }
 
   @override
@@ -150,16 +168,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         children: [
                           const SizedBox(height: 24.0),
                           ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MainApp(
-                                    selectedActivities: selectedActivities,
-                                  ),
-                                ),
-                              );
-                            },
+                            onPressed: () => _navigateToMainApp(context),
                             child: const Text('Get Started'),
                           ),
                         ],
@@ -171,7 +180,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           SmoothPageIndicator(
             controller: _pageController,
-            count: _onboardingScreens.length + 1, // Added 1 for the new page
+            count: _onboardingScreens.length + 1,
             effect: const ScrollingDotsEffect(
               activeDotColor: Colors.blue,
               dotColor: Colors.grey,
@@ -224,7 +233,6 @@ const List<String> availableActivities = [
   'Meditation',
   'Cooking',
   'Gardening',
-  // Add more activities as needed
 ];
 
 class ActivitySelection extends StatefulWidget {
@@ -250,9 +258,11 @@ class _ActivitySelectionState extends State<ActivitySelection> {
     );
 
     if (pickedTime != null) {
-      setState(() {
-        widget.selectedActivities[activity] = pickedTime;
-        widget.onSelectionChanged();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          widget.selectedActivities[activity] = pickedTime;
+          widget.onSelectionChanged();
+        });
       });
     }
   }
@@ -270,9 +280,11 @@ class _ActivitySelectionState extends State<ActivitySelection> {
             if (isSelected) {
               _selectTime(activity);
             } else {
-              setState(() {
-                widget.selectedActivities.remove(activity);
-                widget.onSelectionChanged();
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                setState(() {
+                  widget.selectedActivities.remove(activity);
+                  widget.onSelectionChanged();
+                });
               });
             }
           },

@@ -19,17 +19,20 @@ Future<UsageStatsResult> fetchUsageStatsAndApps() async {
   List<UsageInfo> usageInfoList =
       await UsageStats.queryUsageStats(startDate, endDate);
 
-  // Create a map for quick lookup
-  Map<String, UsageInfo> usageInfoMap = {
-    for (var v in usageInfoList) v.packageName!: v,
-  };
-
   // Get installed apps
   List<Application> installedApps = await DeviceApps.getInstalledApplications(
     includeSystemApps: false,
     includeAppIcons: true,
     onlyAppsWithLaunchIntent: true,
   );
+
+  // Filter usage info to only include installed apps
+  Map<String, UsageInfo> usageInfoMap = {
+    for (var app in installedApps)
+      if (usageInfoList.any((usage) => usage.packageName == app.packageName))
+        app.packageName!: usageInfoList
+            .firstWhere((usage) => usage.packageName == app.packageName)
+  };
 
   return UsageStatsResult(
     usageInfoMap: usageInfoMap,
@@ -45,7 +48,11 @@ Future<int> getTotalTimeInForeground(
 
   for (var usageInfo in usageInfoList) {
     if (usageInfo.packageName == packageName) {
-      totalTimeInForeground += int.parse(usageInfo.totalTimeInForeground!);
+      int? timeInForeground =
+          int.tryParse(usageInfo.totalTimeInForeground ?? '0');
+      if (timeInForeground != null && timeInForeground >= 0) {
+        totalTimeInForeground += timeInForeground;
+      }
     }
   }
 

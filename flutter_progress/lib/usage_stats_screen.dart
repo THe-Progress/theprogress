@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:progress/app_data.dart';
+import 'package:provider/provider.dart';
 import 'package:usage_stats/usage_stats.dart';
 import 'package:device_apps/device_apps.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -33,6 +35,12 @@ class _UsageStatsScreenState extends State<UsageStatsScreen> {
         _usageInfoMap = result.usageInfoMap;
         installedApps = result.installedApps;
         _sortApps();
+        final appData = Provider.of<AppData>(context, listen: false);
+        // for (var app in installedApps) {
+        //   print("- ${app.appName}");
+        // }
+        appData.setUsageInfoMap(_usageInfoMap);
+        appData.setInstalledApps(installedApps);
       });
     } catch (err) {
       Fluttertoast.showToast(

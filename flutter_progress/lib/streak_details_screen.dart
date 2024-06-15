@@ -1,6 +1,10 @@
-// streak_details_screen.dart
+import 'package:device_apps/device_apps.dart';
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:flutter_calendar_carousel/classes/event.dart';
+import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
+import 'package:provider/provider.dart';
+import 'package:progress/app_data.dart';
+import 'package:progress/usage_bar_graph.dart';
 
 class StreakDetailsScreen extends StatefulWidget {
   @override
@@ -9,63 +13,126 @@ class StreakDetailsScreen extends StatefulWidget {
 
 class _StreakDetailsScreenState extends State<StreakDetailsScreen> {
   late Map<DateTime, List> _streakDays;
-  late List<DateTime> _highlightedDays;
+  late String _selectedApp;
 
   @override
   void initState() {
     super.initState();
     _initializeStreakDays();
+    final appData = Provider.of<AppData>(context, listen: false);
+    _selectedApp = appData.installedApps.isNotEmpty
+        ? appData.installedApps.first.packageName!
+        : '';
   }
 
   void _initializeStreakDays() {
-    _streakDays = {};
-    _highlightedDays = _generateStreakDays();
-    for (var day in _highlightedDays) {
-      _streakDays[day] = ['Streak'];
-    }
+    final appData = Provider.of<AppData>(context, listen: false);
+    _streakDays = _generateStreakDays(appData);
   }
 
-  List<DateTime> _generateStreakDays() {
-    // Generate some example streak days
-    List<DateTime> streakDays = [];
+  Map<DateTime, List> _generateStreakDays(AppData appData) {
+    Map<DateTime, List> streakDays = {};
     DateTime today = DateTime.now();
-    for (int i = 0; i < 10; i++) {
-      streakDays.add(today.subtract(Duration(days: i)));
+    if (appData.isTodayStreakDay) {
+      for (int i = 0; i <= appData.currentStreak; i++) {
+        DateTime streakDay = DateTime(today.year, today.month, today.day)
+            .subtract(Duration(days: i));
+        streakDays[streakDay] = ['Streak'];
+      }
+    } else {
+      for (int i = 0; i < appData.currentStreak; i++) {
+        DateTime streakDay = DateTime(today.year, today.month, today.day)
+            .subtract(Duration(days: i + 1));
+        streakDays[streakDay] = ['Streak'];
+      }
     }
     return streakDays;
   }
 
   @override
   Widget build(BuildContext context) {
+    final appData = Provider.of<AppData>(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Streak Details'),
-      ),
+      appBar: null,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TableCalendar(
-              firstDay: DateTime.utc(2020, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              focusedDay: DateTime.now(),
-              calendarFormat: CalendarFormat.month,
-              eventLoader: (day) {
-                return _streakDays[day] ?? [];
+            CalendarCarousel<Event>(
+              onDayPressed: (DateTime date, List<Event> events) {},
+              weekendTextStyle: TextStyle(
+                color: Colors.black,
+              ),
+              thisMonthDayBorderColor: Colors.transparent,
+              weekFormat: false,
+              height: 390.0,
+              selectedDayButtonColor: Colors.transparent,
+              selectedDateTime: DateTime.now(),
+              selectedDayBorderColor: Colors.transparent,
+              daysHaveCircularBorder: false,
+              todayTextStyle: TextStyle(
+                color: Colors.white,
+              ),
+              customDayBuilder: (
+                bool isSelectable,
+                int index,
+                bool isSelectedDay,
+                bool isToday,
+                bool isPrevMonthDay,
+                TextStyle textStyle,
+                bool isNextMonthDay,
+                bool isThisMonthDay,
+                DateTime day,
+              ) {
+                if (_streakDays.containsKey(day)) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 25.0,
+                      ),
+                    ),
+                  );
+                } else {
+                  return null;
+                }
               },
-              calendarStyle: CalendarStyle(
-                todayDecoration: BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.circle,
-                ),
-                selectedDecoration: BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-                markerDecoration: BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
+              todayBorderColor: Colors.blue,
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _selectedApp,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedApp = newValue!;
+                });
+              },
+              items: appData.installedApps
+                  .map<DropdownMenuItem<String>>((Application app) {
+                return DropdownMenuItem<String>(
+                  value: app.packageName!,
+                  child: Text(
+                      app.appName), // Show app name instead of package name
+                );
+              }).toList(),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('App Usage', style: TextStyle(fontSize: 18)),
+            const SizedBox(height: 16),
+            Expanded(
+              child: UsageBarGraph(
+                selectedApp: _selectedApp, // Pass number of days
               ),
             ),
           ],

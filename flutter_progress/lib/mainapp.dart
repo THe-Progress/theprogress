@@ -1,12 +1,25 @@
-// mainapp.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'app_data.dart';
 import 'usage_stats_screen.dart';
 
-//made this thinking there will be multiple windows except usagestatsscreen but currently it just contains usagestatsscreen
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   final Map<String, TimeOfDay> selectedActivities;
 
   const MainApp({required this.selectedActivities});
+
+  @override
+  _MainAppState createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  @override
+  void initState() {
+    super.initState();
+    final appData = Provider.of<AppData>(context, listen: false);
+    appData.setSelectedActivities(widget.selectedActivities);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

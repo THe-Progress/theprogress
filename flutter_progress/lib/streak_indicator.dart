@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'streak_details_screen.dart'; // Import the StreakDetailsScreen
+import 'streak_details_screen.dart';
+import 'package:provider/provider.dart'; // Import the provider package
+import 'app_data.dart'; // Import the AppData class
 
 //plain streak indicator
 class StreakIndicator extends StatefulWidget {
@@ -8,9 +10,6 @@ class StreakIndicator extends StatefulWidget {
 }
 
 class _StreakIndicatorState extends State<StreakIndicator> {
-  int currentStreak = 3; // Example streak value from the user's activity
-  bool isTodayStreakDay =
-      true; // Example flag based on the user's activity specific day
   List<String> streakMessages = [
     'Way to go!',
     'Awesome progress!',
@@ -43,7 +42,15 @@ class _StreakIndicatorState extends State<StreakIndicator> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final appData = Provider.of<AppData>(context);
+    int currentStreak = appData.currentStreak;
+    bool isTodayStreakDay = appData.isTodayStreakDay;
     List<String> orderedWeekdays = _getOrderedWeekdays();
 
     return GestureDetector(
@@ -68,7 +75,7 @@ class _StreakIndicatorState extends State<StreakIndicator> {
               Row(
                 children: [
                   const Icon(Icons.local_fire_department,
-                      color: Colors.red, size: 30),
+                      color: Color.fromRGBO(244, 67, 54, 1), size: 30),
                   const SizedBox(width: 8),
                   Text(
                     '$currentStreak${currentStreak == 1 ? ' Day' : " Days "}',
