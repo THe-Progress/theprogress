@@ -34,7 +34,7 @@ class _StreakDetailsScreenState extends State<StreakDetailsScreen> {
     Map<DateTime, List> streakDays = {};
     DateTime today = DateTime.now();
     if (appData.isTodayStreakDay) {
-      for (int i = 0; i <= appData.currentStreak; i++) {
+      for (int i = 0; i < appData.currentStreak; i++) {
         DateTime streakDay = DateTime(today.year, today.month, today.day)
             .subtract(Duration(days: i));
         streakDays[streakDay] = ['Streak'];
@@ -90,6 +90,7 @@ class _StreakDetailsScreenState extends State<StreakDetailsScreen> {
                     decoration: BoxDecoration(
                       color: Colors.redAccent,
                       shape: BoxShape.circle,
+                      // No border
                     ),
                     child: Center(
                       child: Icon(
