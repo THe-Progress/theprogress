@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const Text("helloworld"),
+      home: const OnboardingScreen(),
     );
   }
 }

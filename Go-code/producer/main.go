@@ -74,7 +74,7 @@ func prompt(ch *amqp.Channel, resdata data) {
 
 //Handling the response_queue delared in python script
 
-func SatricialResponse(ch *amqp.Channel) <-chan amqp.Delivery { //here it takes rabbitMQ channel as arguments and return type is also channel
+func SatricialResponse(ch *amqp.Channel) <-chan amqp.Delivery { //` here it takes rabbitMQ channel as arguments and return type is also channel
 	q, err := ch.QueueDeclare(
 		"response_queue", // Name of the queue for responses
 		false,            // Durable
