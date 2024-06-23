@@ -5,7 +5,6 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'mainapp.dart';
 import 'firebase_options.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'app_data.dart';
 
 void main() async {
@@ -32,7 +31,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late final String _fcmToken;
-  String _topic = "bitch";
+  String _topic = "all";
 
   @override
   void initState() {
@@ -40,10 +39,9 @@ class _MyAppState extends State<MyApp> {
     NotificationService().initialize().then((token) {
       setState(() {
         _fcmToken = token!;
-      });
-      if (token != null) {
         NotificationService().subscribeToTopic(_topic);
-      }
+      });
+      if (token != null) {}
     });
   }
 
