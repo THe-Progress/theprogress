@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:progress/fcm-notify.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,32 +14,6 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-  final FCMToken = await messaging.getToken();
-  print("token, $FCMToken");
-  await messaging.setAutoInitEnabled(true);
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-    provisional: true,
-  );
-
-  if (settings.authorizationStatus == AuthorizationStatus.authorized ||
-      settings.authorizationStatus == AuthorizationStatus.provisional) {
-    print('User granted permission');
-  } else {
-    print('User declined or has not accepted permission');
-  }
-
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('Received a message while in the foreground!');
-    print('Message data: ${message.data}');
-
-    if (message.notification != null) {
-      print('Message also contained a notification: ${message.notification}');
-    }
-  });
 
   runApp(
     ChangeNotifierProvider(
@@ -56,16 +31,20 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  late final String _fcmToken;
+  String _topic = "bitch";
 
   @override
   void initState() {
     super.initState();
-    _subscribeToTopic('xxx');
-  }
-
-  void _subscribeToTopic(String topic) {
-    _firebaseMessaging.subscribeToTopic(topic);
+    NotificationService().initialize().then((token) {
+      setState(() {
+        _fcmToken = token!;
+      });
+      if (token != null) {
+        NotificationService().subscribeToTopic(_topic);
+      }
+    });
   }
 
   @override
@@ -76,7 +55,7 @@ class _MyAppState extends State<MyApp> {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const OnboardingScreen(),
+      home: const Text("helloworld"),
     );
   }
 }
