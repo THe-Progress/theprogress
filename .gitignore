@@ -1,3 +1,2 @@
-pythonmodel/src/progressgpt2/
-*_pycache_/
 *firebase.json*
+**/__pycache__/

@@ -11,14 +11,14 @@ from src.x import generate_message
 # Function to process the message using Transformer model
 
 # RabbitMQ configuration
-queue_name = "notification_queue"
+generate_queue = "generate_queue"
 response_queue = "response_queue"
 
 # Connect to RabbitMQ
 connection = pika.BlockingConnection(pika.URLParameters('amqp://guest:guest@localhost:5672/'))
 channel = connection.channel()
 
-channel.queue_declare(queue=queue_name)
+channel.queue_declare(queue=generate_queue)
 channel.queue_declare(queue=response_queue)
 
 # Callback function to process messages from RabbitMQ
@@ -51,7 +51,7 @@ def callback(ch, method, properties, body):
 
 
 # Set up the consumer
-channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+channel.basic_consume(queue=generate_queue, on_message_callback=callback, auto_ack=True)
 
 print('Waiting for messages. To exit press CTRL+C')
 channel.start_consuming()

@@ -1,9 +1,14 @@
 import re
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
 print("Loading model...")
-model_directory = r'C:\Users\suman\x\theprogress\pythonmodel\src\progressgpt2'
+# model_directory = r'C:\Users\suman\x\theprogress\pythonmodel\src\progressgpt2'
+model_directory=os.getenv("MODEL_DIRECTORY")
+if not model_directory:
+    raise Exception("Model directory not found in environment variables.")
+
 
 # Load the model
 try:
@@ -60,7 +65,8 @@ def generate_message(task, app, severity):
     # Decode the generated text
       # Decode the generated text
     generated_text = loaded_tokenizer.decode(output[0], skip_special_tokens=True)
-    # print(generated_text)
+    print("dumps from model \n \n \n ####### \n \n \n")
+    print(generated_text)
     # Use regex to extract the message
     pattern = re.compile(rf"Task: {task}\nApp: {app}\nSeverity: {severity}\nMessage:(.*?)(?:\n|$)", re.DOTALL)
     matches = pattern.findall(generated_text)
@@ -73,5 +79,5 @@ def generate_message(task, app, severity):
     else:
       return generated_text
 
-generate_message(task="swimming",app="facebook",severity="1")
+# generate_message(task="swimming",app="facebook",severity="1")
 
